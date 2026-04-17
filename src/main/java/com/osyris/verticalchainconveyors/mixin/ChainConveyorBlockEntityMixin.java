@@ -48,12 +48,20 @@ public abstract class ChainConveyorBlockEntityMixin {
     @Unique private final java.util.IdentityHashMap<ChainConveyorPackage, Float> vcc_packageYaws =
             new java.util.IdentityHashMap<>();
     @Unique private boolean vcc_pendingVisualRefresh;
+    // decremented each tick while we're still invalidating stats after load; avoids
+    // an unbounded retry loop if a neighbor never resolves.
+    @Unique private int vcc_statsRetriesRemaining;
+    // set by calculateConnectionStats when it had to fall back (no level / target
+    // block state not a chain conveyor). signals the tick handler to keep retrying.
+    @Unique private boolean vcc_statsUsedFallback;
+    @Unique private static final int VCC_STATS_RETRIES_ON_LOAD = 60;
 
     @Inject(method = "read", at = @At("TAIL"))
     private void vccRefreshVisualsAfterRead(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
         BlockEntity self = (BlockEntity)(Object)this;
         Level level = self.getLevel();
         vcc_pendingVisualRefresh = level == null || level.isClientSide();
+        vcc_statsRetriesRemaining = VCC_STATS_RETRIES_ON_LOAD;
         if (level == null || !level.isClientSide()) return;
 
         vccRefreshClientVisuals(self, level);
@@ -61,6 +69,7 @@ public abstract class ChainConveyorBlockEntityMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void vccInvalidateDeferredLoadStats(CallbackInfo ci) {
+        vcc_statsUsedFallback = false;
         if (!vcc_pendingVisualRefresh) return;
 
         BlockEntity self = (BlockEntity)(Object)this;
@@ -77,12 +86,18 @@ public abstract class ChainConveyorBlockEntityMixin {
         BlockEntity self = (BlockEntity)(Object)this;
         Level level = self.getLevel();
         if (level == null) return;
+
+        // keep retrying until all targets resolved or we exhaust the retry budget.
+        boolean keepRetrying = vcc_statsUsedFallback && vcc_statsRetriesRemaining > 0;
+        if (vcc_statsRetriesRemaining > 0) vcc_statsRetriesRemaining--;
+
         if (!level.isClientSide()) {
-            vcc_pendingVisualRefresh = false;
+            if (!keepRetrying) vcc_pendingVisualRefresh = false;
             return;
         }
 
         vccRefreshClientVisuals(self, level);
+        if (keepRetrying) vcc_pendingVisualRefresh = true;
     }
 
     @Unique
@@ -164,14 +179,20 @@ public abstract class ChainConveyorBlockEntityMixin {
         Direction targetFacing = facing;
         // during BlockEntity.load the level isn't attached yet; Create's read() calls
         // updateBoxWorldPositions → prepareStats → calculateConnectionStats before setLevel.
-        // assume same-facing target in that case; prepareStats will recompute when the
-        // BE later ticks with a valid level.
+        // also on world rejoin the neighbor's chunk may not yet be loaded on the client,
+        // so its state comes back without a FACING property. in both cases we fall back
+        // to same-facing and re-arm the deferred refresh so the next tick recomputes.
         Level level = self.getLevel();
+        boolean targetResolved = false;
         if (level != null) {
             BlockState targetState = level.getBlockState(self.getBlockPos().offset(connection));
-            if (targetState.hasProperty(BlockStateProperties.FACING))
+            if (targetState.hasProperty(BlockStateProperties.FACING)) {
                 targetFacing = targetState.getValue(BlockStateProperties.FACING);
+                targetResolved = true;
+            }
         }
+        if (!targetResolved)
+            vcc_statsUsedFallback = true;
 
         // facing=DOWN to facing=DOWN matches the original hard-coded behaviour; skip our override for it
         if (facing == Direction.DOWN && targetFacing == Direction.DOWN) return;
