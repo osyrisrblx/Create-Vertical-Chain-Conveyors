@@ -1,4 +1,4 @@
-# Vertical Chain Conveyors
+# Create: Vertical Chain Conveyors
 
 A Forge addon for Create that lets Chain Conveyors mount on floors, ceilings, and walls.
 
