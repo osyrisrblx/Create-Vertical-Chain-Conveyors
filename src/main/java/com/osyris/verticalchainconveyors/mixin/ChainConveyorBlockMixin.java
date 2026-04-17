@@ -91,8 +91,10 @@ public abstract class ChainConveyorBlockMixin extends KineticBlock {
 
     /**
      * place the conveyor with its "bottom" facing the clicked surface so the dark side
-     * of the model aligns with the mounting wall/floor/ceiling. skip placement if another
-     * same-facing conveyor's wheel would overlap ours in the wheel plane.
+     * of the model aligns with the mounting wall/floor/ceiling. reject placement if any
+     * neighboring conveyor shares the same wheel axis within the local 3x3 wheel plane —
+     * their wheels (radius 1.25) would overlap regardless of which side of the axis each
+     * is mounted on, matching vanilla Create's "no overlap in the wheel plane" rule.
      */
     @Inject(method = "m_5573_", at = @At("HEAD"), cancellable = true)
     private void vccGetStateForPlacement(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
@@ -102,13 +104,13 @@ public abstract class ChainConveyorBlockMixin extends KineticBlock {
 
         boolean blocked;
         if (axis == Direction.Axis.Y) {
-            blocked = vccHasNeighbour(ctx, pos, facing,
+            blocked = vccHasNeighbour(ctx, pos, axis,
                     new int[]{-1, 0, 1}, new int[]{0}, new int[]{-1, 0, 1});
         } else if (axis == Direction.Axis.X) {
-            blocked = vccHasNeighbour(ctx, pos, facing,
+            blocked = vccHasNeighbour(ctx, pos, axis,
                     new int[]{0}, new int[]{-1, 0, 1}, new int[]{-1, 0, 1});
         } else {
-            blocked = vccHasNeighbour(ctx, pos, facing,
+            blocked = vccHasNeighbour(ctx, pos, axis,
                     new int[]{-1, 0, 1}, new int[]{-1, 0, 1}, new int[]{0});
         }
 
@@ -121,14 +123,14 @@ public abstract class ChainConveyorBlockMixin extends KineticBlock {
     }
 
     @Unique
-    private boolean vccHasNeighbour(BlockPlaceContext ctx, BlockPos pos, Direction facing,
+    private boolean vccHasNeighbour(BlockPlaceContext ctx, BlockPos pos, Direction.Axis axis,
             int[] xs, int[] ys, int[] zs) {
         for (int dx : xs)
             for (int dy : ys)
                 for (int dz : zs) {
                     if (dx == 0 && dy == 0 && dz == 0) continue;
                     BlockState n = ctx.getLevel().getBlockState(pos.offset(dx, dy, dz));
-                    if (n.getBlock() == this && n.getValue(VCC_FACING) == facing)
+                    if (n.getBlock() == this && n.getValue(VCC_FACING).getAxis() == axis)
                         return true;
                 }
         return false;
