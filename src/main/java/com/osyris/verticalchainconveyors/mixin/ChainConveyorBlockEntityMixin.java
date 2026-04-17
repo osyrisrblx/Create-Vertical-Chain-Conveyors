@@ -65,6 +65,9 @@ public abstract class ChainConveyorBlockEntityMixin {
         if (level == null || !level.isClientSide()) return;
 
         vccRefreshClientVisuals(self, level);
+        // vccRefreshClientVisuals resets vcc_pendingVisualRefresh to false; re-arm
+        // if any target couldn't be resolved so the tick handler keeps retrying.
+        if (vcc_statsUsedFallback) vcc_pendingVisualRefresh = true;
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -102,6 +105,7 @@ public abstract class ChainConveyorBlockEntityMixin {
 
     @Unique
     private void vccRefreshClientVisuals(BlockEntity self, Level level) {
+        vcc_statsUsedFallback = false;
         connectionStats = null;
         prepareStats();
         updateChainShapes();
