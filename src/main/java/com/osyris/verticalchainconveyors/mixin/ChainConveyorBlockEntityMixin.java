@@ -27,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -60,19 +59,35 @@ public abstract class ChainConveyorBlockEntityMixin {
         vccRefreshClientVisuals(self, level);
     }
 
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void vccInvalidateDeferredLoadStats(CallbackInfo ci) {
+        if (!vcc_pendingVisualRefresh) return;
+
+        BlockEntity self = (BlockEntity)(Object)this;
+        Level level = self.getLevel();
+        if (level == null) return;
+
+        connectionStats = null;
+    }
+
     @Inject(method = "tick", at = @At("TAIL"))
     private void vccRefreshVisualsAfterLoad(CallbackInfo ci) {
         if (!vcc_pendingVisualRefresh) return;
 
         BlockEntity self = (BlockEntity)(Object)this;
         Level level = self.getLevel();
-        if (level == null || !level.isClientSide()) return;
+        if (level == null) return;
+        if (!level.isClientSide()) {
+            vcc_pendingVisualRefresh = false;
+            return;
+        }
 
         vccRefreshClientVisuals(self, level);
     }
 
     @Unique
     private void vccRefreshClientVisuals(BlockEntity self, Level level) {
+        connectionStats = null;
         prepareStats();
         updateChainShapes();
         ((VCCCachedRenderBBAccessor)(Object)this).vcc_invalidateRenderBoundingBox();
@@ -87,12 +102,6 @@ public abstract class ChainConveyorBlockEntityMixin {
 
         BlockState state = self.getBlockState();
         level.sendBlockUpdated(self.getBlockPos(), state, state, 16);
-    }
-
-    @Inject(method = "createRenderBoundingBox", at = @At("HEAD"), cancellable = true)
-    private void vccUseConnectedRenderBounds(CallbackInfoReturnable<AABB> cir) {
-        BlockEntity self = (BlockEntity)(Object)this;
-        cir.setReturnValue(new AABB(self.getBlockPos()).inflate(connections.isEmpty() ? 3 : 64));
     }
 
     /**
@@ -176,7 +185,7 @@ public abstract class ChainConveyorBlockEntityMixin {
         ci.cancel();
     }
 
-    @Redirect(method = "tick", require = 0, at = @At(value = "INVOKE",
+    @Redirect(method = "tick", require = 1, at = @At(value = "INVOKE", ordinal = 0,
             target = "Lnet/minecraft/world/phys/Vec3;length()D", remap = true))
     private double vccUseActualChainLengthWhenFlippingTravellingPackage(Vec3 offsetVec) {
         BlockEntity self = (BlockEntity)(Object)this;
@@ -194,23 +203,6 @@ public abstract class ChainConveyorBlockEntityMixin {
             return offsetVec.length();
 
         return stats.chainLength() + 22 / 16f;
-    }
-
-    @Inject(method = "addConnectionTo", at = @At("HEAD"), cancellable = true)
-    private void vccRejectMisalignedConnection(BlockPos target, CallbackInfoReturnable<Boolean> cir) {
-        BlockEntity self = (BlockEntity)(Object)this;
-        if (self.getLevel() == null)
-            return;
-
-        BlockState sourceState = self.getBlockState();
-        BlockState targetState = self.getLevel().getBlockState(target);
-        if (!sourceState.hasProperty(BlockStateProperties.FACING)
-                || !targetState.hasProperty(BlockStateProperties.FACING))
-            return;
-
-        if (!VCCChainConveyorMath.sameAlignment(sourceState.getValue(BlockStateProperties.FACING),
-                targetState.getValue(BlockStateProperties.FACING)))
-            cir.setReturnValue(false);
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE",
@@ -231,7 +223,7 @@ public abstract class ChainConveyorBlockEntityMixin {
 
         prepareStats();
         ConnectionStats sourceStats = connectionStats.get(connectionToTarget);
-        if (sourceStats != null && VCCChainConveyorMath.sameAlignment(sourceFacing, targetFacing)) {
+        if (sourceStats != null && VCCChainConveyorMath.sameFacing(sourceFacing, targetFacing)) {
             box.chainPosition = VCCChainConveyorMath.remoteEntryAngle(sourceStats.tangentAngle(),
                     sourceReversed);
             VerticalChainConveyors.debugRouting(

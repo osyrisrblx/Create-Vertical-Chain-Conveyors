@@ -246,24 +246,13 @@ class VCCChainConveyorMathTest {
     }
 
     @Test
-    void sameAlignmentRequiresExactFacing() {
+    void sameFacingRequiresExactFacing() {
         for (Direction facing : Direction.values())
-            assertTrue(VCCChainConveyorMath.sameAlignment(facing, facing));
+            assertTrue(VCCChainConveyorMath.sameFacing(facing, facing));
 
-        assertEquals(false, VCCChainConveyorMath.sameAlignment(Direction.WEST, Direction.EAST));
-        assertEquals(false, VCCChainConveyorMath.sameAlignment(Direction.DOWN, Direction.UP));
-        assertEquals(false, VCCChainConveyorMath.sameAlignment(Direction.NORTH, Direction.SOUTH));
-    }
-
-    @Test
-    void travelPositionInterpolatesAndClampsToConnectionEndpoints() {
-        VCCChainConveyorMath.ConnectionStats stats =
-                new VCCChainConveyorMath.ConnectionStats(0, 10,
-                        new Vec3(1, 2, 3), new Vec3(1, 2, 13));
-
-        assertVecEquals(stats.start(), VCCChainConveyorMath.travelPosition(stats, -4));
-        assertVecEquals(new Vec3(1, 2, 8), VCCChainConveyorMath.travelPosition(stats, 5));
-        assertVecEquals(stats.end(), VCCChainConveyorMath.travelPosition(stats, 14));
+        assertEquals(false, VCCChainConveyorMath.sameFacing(Direction.WEST, Direction.EAST));
+        assertEquals(false, VCCChainConveyorMath.sameFacing(Direction.DOWN, Direction.UP));
+        assertEquals(false, VCCChainConveyorMath.sameFacing(Direction.NORTH, Direction.SOUTH));
     }
 
     @Test

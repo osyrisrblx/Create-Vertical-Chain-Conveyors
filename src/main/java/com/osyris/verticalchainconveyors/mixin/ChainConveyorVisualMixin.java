@@ -106,25 +106,16 @@ public abstract class ChainConveyorVisualMixin {
 
         // wheel orientation
         TransformedInstance wheel = guards.get(0);
-        switch (facing) {
-            case UP:
-                wheel.rotateCenteredDegrees(180, Direction.Axis.X);
-                break;
-            case NORTH:
-                wheel.rotateCenteredDegrees(90, Direction.Axis.X);
-                break;
-            case SOUTH:
-                wheel.rotateCenteredDegrees(270, Direction.Axis.X);
-                break;
-            case EAST:
-                wheel.rotateCenteredDegrees(90, Direction.Axis.Z);
-                break;
-            case WEST:
-                wheel.rotateCenteredDegrees(270, Direction.Axis.Z);
-                break;
-            default:
-                break;
-        }
+        if (facing == Direction.UP)
+            wheel.rotateCenteredDegrees(180, Direction.Axis.X);
+        else if (facing == Direction.NORTH)
+            wheel.rotateCenteredDegrees(90, Direction.Axis.X);
+        else if (facing == Direction.SOUTH)
+            wheel.rotateCenteredDegrees(270, Direction.Axis.X);
+        else if (facing == Direction.EAST)
+            wheel.rotateCenteredDegrees(90, Direction.Axis.Z);
+        else if (facing == Direction.WEST)
+            wheel.rotateCenteredDegrees(270, Direction.Axis.Z);
         wheel.setChanged();
 
         if (guards.size() <= 1) return;
@@ -148,38 +139,29 @@ public abstract class ChainConveyorVisualMixin {
             guardIdx++;
 
             float inPlaneYaw;
-            switch (axis) {
-                case X:
-                    inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getZ(), connection.getY());
-                    break;
-                case Z:
-                    inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getY(), connection.getX());
-                    break;
-                default: // Y (facing=UP)
-                    inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getX(), connection.getZ());
-                    break;
-            }
+            if (axis == Direction.Axis.X)
+                inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getZ(), connection.getY());
+            else if (axis == Direction.Axis.Z)
+                inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getY(), connection.getX());
+            else
+                inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getX(), connection.getZ());
 
             guard.setIdentityTransform()
                  .translate(visualX, visualY, visualZ)
                  .center();
 
-            switch (axis) {
-                case X:
-                    guard.rotateXDegrees(inPlaneYaw - 90f)
-                         .rotateZDegrees(facing == Direction.WEST ? -90f : 90f);
-                    break;
-                case Z:
-                    guard.rotateZDegrees(inPlaneYaw - 90f)
-                         .rotateXDegrees(-90f);
-                    if (facing == Direction.NORTH) {
-                        guard.rotateZDegrees(180f);
-                    }
-                    break;
-                default: // Y — for facing=UP we also flip the guide's bottom upward
-                    guard.rotateYDegrees(inPlaneYaw)
-                         .rotateZDegrees(180f);
-                    break;
+            if (axis == Direction.Axis.X) {
+                guard.rotateXDegrees(inPlaneYaw - 90f)
+                     .rotateZDegrees(facing == Direction.WEST ? -90f : 90f);
+            } else if (axis == Direction.Axis.Z) {
+                guard.rotateZDegrees(inPlaneYaw - 90f)
+                     .rotateXDegrees(-90f);
+                if (facing == Direction.NORTH) {
+                    guard.rotateZDegrees(180f);
+                }
+            } else {
+                guard.rotateYDegrees(inPlaneYaw)
+                     .rotateZDegrees(180f);
             }
 
             guard.uncenter();

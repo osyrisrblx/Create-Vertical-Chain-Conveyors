@@ -153,11 +153,6 @@ public abstract class ChainConveyorConnectionHandlerMixin {
         if (facing == Direction.DOWN && targetFacing == Direction.DOWN)
             return; // let original handle floor-to-floor mounts
 
-        if (!VCCChainConveyorMath.sameAlignment(facing, targetFacing)) {
-            cir.setReturnValue(vccFail("chain_conveyor.cannot_connect_misaligned"));
-            return;
-        }
-
         if (!simulate && player.isShiftKeyDown()) {
             CreateLang.translate("chain_conveyor.selection_cleared")
                     .sendStatus(player);

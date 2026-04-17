@@ -16,7 +16,6 @@
         "ChainConveyorRendererMixin",
         "ChainConveyorRidingHandlerMixin",
         "ChainConveyorVisualMixin",
-        "VCCChainConveyorBlockEntityAccessor",
         "VCCChainVisualAccessor",
         "VCCSingleAxisVisualAccessor",
         "VCCVisualAccessor"

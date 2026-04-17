@@ -95,15 +95,6 @@ public final class VCCChainConveyorMath {
                         chainPosition, facing.getAxis()));
     }
 
-    public static Vec3 travelPosition(ConnectionStats stats, float chainPosition) {
-        if (stats.chainLength() <= 1.0E-5)
-            return stats.start();
-
-        float clamped = Mth.clamp(chainPosition, 0, stats.chainLength());
-        Vec3 direction = stats.end().subtract(stats.start()).normalize();
-        return stats.start().add(direction.scale(clamped));
-    }
-
     public static Float horizontalYaw(Vec3 direction) {
         Vec3 horizontal = direction.multiply(1, 0, 1);
         if (horizontal.lengthSqr() < 1.0E-5)
@@ -119,7 +110,7 @@ public final class VCCChainConveyorMath {
         };
     }
 
-    public static boolean sameAlignment(Direction sourceFacing, Direction targetFacing) {
+    public static boolean sameFacing(Direction sourceFacing, Direction targetFacing) {
         return sourceFacing == targetFacing;
     }
 
@@ -136,10 +127,6 @@ public final class VCCChainConveyorMath {
 
     public static float connectionEntryAngle(float tangentAngle, boolean reversed) {
         return wrapAngle(tangentAngle + 2 * OFF_BRANCH_DISTANCE * (reversed ? -1 : 1));
-    }
-
-    public static float reverseTravelPosition(float chainLength, float chainPosition) {
-        return Math.max(0, chainLength - chainPosition);
     }
 
     public static void forPointsAlongChains(BlockPos sourcePos, Direction sourceFacing,

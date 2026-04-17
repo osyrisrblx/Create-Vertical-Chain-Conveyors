@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorRidingHandler;
 import com.osyris.verticalchainconveyors.VCCChainConveyorMath;
 
@@ -50,6 +51,30 @@ public abstract class ChainConveyorRidingHandlerMixin {
 
         // axis-aware target already baked into the redirected atBottomCenterOf
         return Vec3.ZERO;
+    }
+
+    @Redirect(method = "updateTargetPosition", at = @At(value = "INVOKE",
+            target = "Lcom/simibubi/create/content/kinetics/chainConveyor/ChainConveyorBlockEntity;wrapAngle(F)F",
+            ordinal = 0))
+    private static float vccRiderTargetLoopEntry(ChainConveyorBlockEntity source, float vanillaEntryAngle) {
+        BlockPos connection = ChainConveyorRidingHandler.ridingConnection;
+        if (connection == null)
+            return source.wrapAngle(vanillaEntryAngle);
+
+        BlockState sourceState = source.getBlockState();
+        Direction sourceFacing = sourceState.hasProperty(BlockStateProperties.FACING)
+                ? sourceState.getValue(BlockStateProperties.FACING)
+                : Direction.DOWN;
+
+        BlockState targetState = source.getLevel().getBlockState(source.getBlockPos().offset(connection));
+        Direction targetFacing = targetState.hasProperty(BlockStateProperties.FACING)
+                ? targetState.getValue(BlockStateProperties.FACING)
+                : Direction.DOWN;
+
+        if (sourceFacing == Direction.DOWN && targetFacing == Direction.DOWN)
+            return source.wrapAngle(vanillaEntryAngle);
+
+        return VCCChainConveyorMath.targetEntryAngle(connection.multiply(-1), targetFacing, source.reversed);
     }
 
     private static Direction vccFacingAt(BlockPos pos) {

@@ -64,17 +64,13 @@ public abstract class ChainConveyorShapeBBMixin {
 
         Vec3 diff = vcc_center.subtract(intersection);
         float angle;
-        switch (vcc_facing.getAxis()) {
-            case X:
-                angle = (float) ((Mth.RAD_TO_DEG * Mth.atan2(diff.z, diff.y) + 360 + 180) % 360);
-                break;
-            case Z:
-                angle = (float) ((Mth.RAD_TO_DEG * Mth.atan2(diff.y, diff.x) + 360 + 180) % 360);
-                break;
-            default: // Y (facing=UP falls here; facing=DOWN returned early above)
-                angle = (float) ((Mth.RAD_TO_DEG * Mth.atan2(diff.x, diff.z) + 360 + 180) % 360);
-                break;
-        }
+        Direction.Axis axis = vcc_facing.getAxis();
+        if (axis == Direction.Axis.X)
+            angle = (float) ((Mth.RAD_TO_DEG * Mth.atan2(diff.z, diff.y) + 360 + 180) % 360);
+        else if (axis == Direction.Axis.Z)
+            angle = (float) ((Mth.RAD_TO_DEG * Mth.atan2(diff.y, diff.x) + 360 + 180) % 360);
+        else
+            angle = (float) ((Mth.RAD_TO_DEG * Mth.atan2(diff.x, diff.z) + 360 + 180) % 360);
         cir.setReturnValue(Math.round(angle / 45) * 45f);
     }
 
@@ -89,19 +85,15 @@ public abstract class ChainConveyorShapeBBMixin {
         if (vcc_center == null) return;
 
         Vec3 radiusVec;
-        switch (vcc_facing.getAxis()) {
-            case X:
-                radiusVec = new Vec3(0, VCC_RADIUS, 0);
-                break;
-            case Z:
-                radiusVec = new Vec3(VCC_RADIUS, 0, 0);
-                break;
-            default: // Y
-                radiusVec = new Vec3(0, 0, VCC_RADIUS);
-                break;
-        }
+        Direction.Axis axis = vcc_facing.getAxis();
+        if (axis == Direction.Axis.X)
+            radiusVec = new Vec3(0, VCC_RADIUS, 0);
+        else if (axis == Direction.Axis.Z)
+            radiusVec = new Vec3(VCC_RADIUS, 0, 0);
+        else
+            radiusVec = new Vec3(0, 0, VCC_RADIUS);
 
-        Vec3 rotated = VecHelper.rotate(radiusVec, position, vcc_facing.getAxis());
+        Vec3 rotated = VecHelper.rotate(radiusVec, position, axis);
         Vec3 axialOffset = new Vec3(
                 vcc_facing.getStepX() * 0.125,
                 vcc_facing.getStepY() * 0.125,

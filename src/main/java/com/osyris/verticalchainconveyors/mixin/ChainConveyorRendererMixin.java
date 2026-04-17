@@ -77,10 +77,9 @@ public abstract class ChainConveyorRendererMixin extends KineticBlockEntityRende
                 .renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
 
         BlockPos pos = be.getBlockPos();
-        VCCChainConveyorBlockEntityAccessor beAccessor = (VCCChainConveyorBlockEntityAccessor)(Object)be;
-        for (ChainConveyorPackage box : beAccessor.vcc_getLoopingPackages())
+        for (ChainConveyorPackage box : be.getLoopingPackages())
             vccRenderBox(be, ms, buffer, overlay, pos, box, partialTicks);
-        for (Entry<BlockPos, List<ChainConveyorPackage>> entry : beAccessor.vcc_getTravellingPackages().entrySet())
+        for (Entry<BlockPos, List<ChainConveyorPackage>> entry : be.getTravellingPackages().entrySet())
             for (ChainConveyorPackage box : entry.getValue())
                 vccRenderBox(be, ms, buffer, overlay, pos, box, partialTicks);
 
@@ -152,59 +151,43 @@ public abstract class ChainConveyorRendererMixin extends KineticBlockEntityRende
     @Unique
     private static void vccOrientWheel(SuperByteBuffer wheel, Direction facing) {
         wheel.center();
-        switch (facing) {
-            case UP:
-                wheel.rotateXDegrees(180);
-                break;
-            case NORTH:
-                wheel.rotateXDegrees(90);
-                break;
-            case SOUTH:
-                wheel.rotateXDegrees(270);
-                break;
-            case EAST:
-                wheel.rotateZDegrees(90);
-                break;
-            case WEST:
-                wheel.rotateZDegrees(270);
-                break;
-            default:
-                break;
-        }
+        if (facing == Direction.UP)
+            wheel.rotateXDegrees(180);
+        else if (facing == Direction.NORTH)
+            wheel.rotateXDegrees(90);
+        else if (facing == Direction.SOUTH)
+            wheel.rotateXDegrees(270);
+        else if (facing == Direction.EAST)
+            wheel.rotateZDegrees(90);
+        else if (facing == Direction.WEST)
+            wheel.rotateZDegrees(270);
         wheel.uncenter();
     }
 
     @Unique
     private static void vccOrientGuard(SuperByteBuffer guard, Direction facing, BlockPos connection) {
         float inPlaneYaw;
-        switch (facing.getAxis()) {
-            case X:
-                inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getZ(), connection.getY());
-                break;
-            case Z:
-                inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getY(), connection.getX());
-                break;
-            default:
-                inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getX(), connection.getZ());
-                break;
-        }
+        Direction.Axis axis = facing.getAxis();
+        if (axis == Direction.Axis.X)
+            inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getZ(), connection.getY());
+        else if (axis == Direction.Axis.Z)
+            inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getY(), connection.getX());
+        else
+            inPlaneYaw = Mth.RAD_TO_DEG * (float) Mth.atan2(connection.getX(), connection.getZ());
 
         guard.center();
-        switch (facing.getAxis()) {
-            case X:
-                guard.rotateXDegrees(inPlaneYaw - 90f)
-                        .rotateZDegrees(facing == Direction.WEST ? -90f : 90f);
-                break;
-            case Z:
-                guard.rotateZDegrees(inPlaneYaw - 90f)
-                        .rotateXDegrees(-90f);
-                if (facing == Direction.NORTH)
-                    guard.rotateZDegrees(180f);
-                break;
-            default:
-                guard.rotateYDegrees(inPlaneYaw)
-                        .rotateZDegrees(180f);
-                break;
+        if (axis == Direction.Axis.X) {
+            guard.rotateXDegrees(inPlaneYaw - 90f)
+                    .rotateZDegrees(facing == Direction.WEST ? -90f : 90f);
+        } else if (axis == Direction.Axis.Z) {
+            guard.rotateZDegrees(inPlaneYaw - 90f)
+                    .rotateXDegrees(-90f);
+            if (facing == Direction.NORTH) {
+                guard.rotateZDegrees(180f);
+            }
+        } else {
+            guard.rotateYDegrees(inPlaneYaw)
+                    .rotateZDegrees(180f);
         }
         guard.uncenter();
     }

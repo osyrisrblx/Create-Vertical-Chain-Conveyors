@@ -8,8 +8,8 @@ issueTrackerURL = ""
     version = "${file.jarVersion}"
     displayName = "Vertical Chain Conveyors"
     description = '''
-        Allows Create mod Chain Conveyors to be placed vertically (X or Z axis aligned),
-        with the 45-degree slope limit applied relative to the conveyor's orientation.
+        Allows Create Chain Conveyors to mount on floors, ceilings, and walls,
+        with axis-aware connection geometry, previews, rendering, and package movement.
     '''
 
 [[dependencies.verticalchainconveyors]]

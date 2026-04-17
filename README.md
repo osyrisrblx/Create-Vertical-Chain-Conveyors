@@ -15,9 +15,7 @@ Vanilla Create Chain Conveyors are floor-mounted only. This mod extends Create's
 
 ## Current Behavior
 
-Chain links can be made between conveyors that face the same direction. For example, two wall-mounted conveyors on the same wall orientation can connect to each other, and two ceiling-mounted conveyors can connect to each other.
-
-Connections between different mounting directions are intentionally rejected for now. This keeps the connection math, package routing, and visual behavior predictable while still supporting vertical conveyor layouts.
+Chain links can be made between conveyors mounted on any face. Same-facing runs, floor-to-wall links, wall-to-ceiling links, and other mixed mounting directions all use the target conveyor's wheel plane when packages enter the next loop.
 
 ## Compatibility
 

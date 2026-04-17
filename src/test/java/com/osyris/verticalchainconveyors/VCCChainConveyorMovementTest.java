@@ -1,56 +1,13 @@
 package com.osyris.verticalchainconveyors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.Vec3;
 
 class VCCChainConveyorMovementTest {
-
-    @Test
-    void reverseTravelPositionUsesActualMixedFacingChainLength() {
-        BlockPos source = new BlockPos(2, 3, 4);
-        VCCChainConveyorMath.ConnectionStats stats = null;
-        float vanillaRawLength = 0;
-
-        for (int x = -6; x <= 6 && stats == null; x++) {
-            for (int y = -6; y <= 6 && stats == null; y++) {
-                for (int z = -6; z <= 6; z++) {
-                    BlockPos connection = new BlockPos(x, y, z);
-                    if (connection.distSqr(BlockPos.ZERO) < 9)
-                        continue;
-                    VCCChainConveyorMath.ConnectionStats candidate =
-                            VCCChainConveyorMath.calculateConnectionStats(source, connection,
-                                    Direction.EAST, Direction.UP, false);
-                    float rawLength = (float) Vec3.atLowerCornerOf(connection).length() - 22 / 16f;
-                    if (Math.abs(rawLength - candidate.chainLength()) <= 0.05f)
-                        continue;
-
-                    stats = candidate;
-                    vanillaRawLength = rawLength;
-                    break;
-                }
-            }
-        }
-
-        assertNotNull(stats);
-        float currentPosition = stats.chainLength() * 0.25f;
-
-        assertTrue(Math.abs(vanillaRawLength - stats.chainLength()) > 0.05f);
-        assertEquals(stats.chainLength() * 0.75f,
-                VCCChainConveyorMath.reverseTravelPosition(stats.chainLength(), currentPosition),
-                1.0E-5);
-    }
-
-    @Test
-    void reverseTravelPositionClampsPastEndToStart() {
-        assertEquals(0, VCCChainConveyorMath.reverseTravelPosition(5, 7), 1.0E-5);
-    }
 
     @Test
     void reversedTargetEntryAngleMatchesTargetIncomingConnection() {
@@ -68,11 +25,11 @@ class VCCChainConveyorMovementTest {
     }
 
     @Test
-    void sameAlignmentConnectionsUseObjectSpaceTargetEntryAngles() {
+    void sameFacingConnectionsUseObjectSpaceTargetEntryAngles() {
         BlockPos source = new BlockPos(0, 0, 0);
 
         for (Direction facing : Direction.values()) {
-            if (!VCCChainConveyorMath.sameAlignment(facing, facing))
+            if (!VCCChainConveyorMath.sameFacing(facing, facing))
                 continue;
 
             VCCChainConveyorMath.ConnectionStats sourceStats =
