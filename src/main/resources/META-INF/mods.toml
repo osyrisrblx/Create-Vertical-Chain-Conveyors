@@ -1,0 +1,37 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+issueTrackerURL = ""
+
+[[mods]]
+    modId = "verticalchainconveyors"
+    version = "${file.jarVersion}"
+    displayName = "Vertical Chain Conveyors"
+    description = '''
+        Allows Create mod Chain Conveyors to be placed vertically (X or Z axis aligned),
+        with the 45-degree slope limit applied relative to the conveyor's orientation.
+    '''
+
+[[dependencies.verticalchainconveyors]]
+    modId = "forge"
+    mandatory = true
+    versionRange = "[47.1,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.verticalchainconveyors]]
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "[1.20.1,1.21)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.verticalchainconveyors]]
+    modId = "create"
+    mandatory = true
+    versionRange = "[6.0,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[mixins]]
+    config = "verticalchainconveyors.mixins.json"

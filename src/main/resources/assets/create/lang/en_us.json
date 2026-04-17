@@ -1,0 +1,4 @@
+{
+    "create.chain_conveyor.cannot_connect_axially": "Cannot connect along conveyor axis",
+    "create.chain_conveyor.cannot_connect_misaligned": "Chain conveyors must face the same direction"
+}

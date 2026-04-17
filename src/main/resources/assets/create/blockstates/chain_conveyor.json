@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "facing=down":  { "model": "create:block/chain_conveyor/block" },
+        "facing=up":    { "model": "create:block/chain_conveyor/block", "x": 180 },
+        "facing=north": { "model": "create:block/chain_conveyor/block", "x": 90, "y": 180 },
+        "facing=south": { "model": "create:block/chain_conveyor/block", "x": 270, "y": 180 },
+        "facing=west":  { "model": "create:block/chain_conveyor/block", "x": 90, "y": 90 },
+        "facing=east":  { "model": "create:block/chain_conveyor/block", "x": 90, "y": 270 }
+    }
+}
