@@ -7,8 +7,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorShape;
+import com.simibubi.create.content.trains.track.TrackBlockOutline;
 import com.osyris.verticalchainconveyors.AxisContext;
+import com.osyris.verticalchainconveyors.VCCChainConveyorShapes;
 
 import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
@@ -104,5 +108,22 @@ public abstract class ChainConveyorShapeBBMixin {
                 .add(Vec3.atLowerCornerOf(anchor))
                 .add(axialOffset);
         cir.setReturnValue(point);
+    }
+
+    /**
+     * Create's drawOutline hardcodes AllShapes.CHAIN_CONVEYOR_INTERACTION — the
+     * horizontal cross-disc — which ChainConveyorInteractionHandler renders when
+     * the player hovers a conveyor while holding a chain, package, or frogport.
+     * For non-DOWN facings we swap in the axis-relative shape so the outline
+     * sits in the correct wheel plane.
+     */
+    @Inject(method = "drawOutline", at = @At("HEAD"), cancellable = true)
+    private void vccDrawOutline(BlockPos pos, PoseStack poseStack, VertexConsumer vertexConsumer,
+            CallbackInfo ci) {
+        if (vcc_facing == null || vcc_facing == Direction.DOWN) return;
+
+        TrackBlockOutline.renderShape(VCCChainConveyorShapes.forAxis(vcc_facing.getAxis()),
+                poseStack, vertexConsumer, null);
+        ci.cancel();
     }
 }
