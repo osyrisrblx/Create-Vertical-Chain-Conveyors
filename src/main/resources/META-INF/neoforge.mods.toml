@@ -6,7 +6,9 @@ issueTrackerURL = ""
 [[mods]]
     modId = "verticalchainconveyors"
     version = "${file.jarVersion}"
-    displayName = "Vertical Chain Conveyors"
+    displayName = "Create: Vertical Chain Conveyors"
+    authors = "Osyris"
+    logoFile = "logo.png"
     description = '''
         Allows Create Chain Conveyors to mount on floors, ceilings, and walls,
         with axis-aware connection geometry, previews, rendering, and package movement.
