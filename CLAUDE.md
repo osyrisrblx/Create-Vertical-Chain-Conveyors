@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this mod does
 
-Forge mod for Minecraft 1.20.1 that extends Create 6.0.8's Chain Conveyor to support all 6 mounting directions (floor, ceiling, and the 4 walls), instead of just floor-mounted. It does this entirely via Mixins on Create's existing `chain_conveyor` block — no new block is registered, so one item and all existing Create logistics (packages, frogports, routing) work transparently across mixed orientations.
+NeoForge mod for Minecraft 1.21.1 that extends Create 6.0.10's Chain Conveyor to support all 6 mounting directions (floor, ceiling, and the 4 walls), instead of just floor-mounted. It does this entirely via Mixins on Create's existing `chain_conveyor` block — no new block is registered, so one item and all existing Create logistics (packages, frogports, routing) work transparently across mixed orientations.
 
 - Mod ID: `verticalchainconveyors`
 - Package: `com.osyris.verticalchainconveyors`
-- Target: Create 6.0.x · Forge 47.x · MC 1.20.1 · Java 17
+- Target: Create 6.0.x · NeoForge 21.1.x · MC 1.21.1 · Java 21
 
 ## Build
 
@@ -16,9 +16,9 @@ Forge mod for Minecraft 1.20.1 that extends Create 6.0.8's Chain Conveyor to sup
 ./scripts/gradle-win-java.sh build
 ```
 
-The helper runs the Gradle wrapper with Java 17 and redirects Gradle caches away from the WSL filesystem when needed. Local Java paths, cache paths, and deploy destinations belong in `CLAUDE.local.md`, which is intentionally gitignored.
+The helper stages the repo into a Windows-local workspace (under `%LOCALAPPDATA%\Temp\vcc-build\workspace`), runs `gradlew.bat` there with Java 21, and syncs `build/` back to the repo when the build succeeds. This avoids NeoForge's NFRT / `binarypatcher` stalls when reading/writing through `\\wsl.localhost\…`. Local Java paths, cache paths, workspace paths, and deploy destinations belong in `CLAUDE.local.md`, which is intentionally gitignored.
 
-Output: `build/libs/verticalchainconveyors-1.20.1-1.0.0.jar`
+Output: `build/libs/verticalchainconveyors-1.21.1-1.0.0.jar`
 
 After a successful build, deploy to the local runtime locations listed in `CLAUDE.local.md` if that file exists.
 
@@ -80,9 +80,9 @@ All three mixins that care about geometry (`ChainConveyorBlockEntityMixin`, `Cha
 
 ### The mixins
 
-All mixins live in `src/main/java/com/osyris/verticalchainconveyors/mixin/` and are declared in `src/main/resources/verticalchainconveyors.mixins.json`. All targets are `remap = false` because Create's code is accessed through its own (non-SRG) names at compile time.
+All mixins live in `src/main/java/com/osyris/verticalchainconveyors/mixin/` and are declared in `src/main/resources/verticalchainconveyors.mixins.json`. Mixins that target Create classes use `remap = false` because Create's code is already under its own (non-mapped) names. Mixins targeting Minecraft classes use `remap = true`; NeoForge runs on Mojmap names at runtime so the literal Mojmap names (e.g., `createBlockStateDefinition`, `getStateForPlacement`, `getShape`, `getInteractionShape`) match directly.
 
-- **`ChainConveyorBlockStateMixin`** — injects `FACING` into the generic `Block.createBlockStateDefinition` (must target the SRG name `m_7926_` because we can't `@Shadow` an inherited method; guarded by an `instanceof ChainConveyorBlock` check).
+- **`ChainConveyorBlockStateMixin`** — injects `FACING` into the generic `Block.createBlockStateDefinition` on the declaring class (we can't `@Shadow` an inherited method), guarded by an `instanceof ChainConveyorBlock` check.
 - **`ChainConveyorBlockMixin`** — overrides `getRotationAxis`, `getStateForPlacement`, and shape methods on `ChainConveyorBlock` itself.
 - **`ChainConveyorBlockEntityMixin`** — replaces `calculateConnectionStats` for non-DOWN facings and pushes the current facing to `AxisContext` before `updateChainShapes` runs.
 - **`ChainConveyorShapeBBMixin`** — reads facing from `AxisContext` in its constructor, then overrides `getChainPosition` and `getVec` for package-on-loop positioning.
@@ -99,7 +99,7 @@ All mixins live in `src/main/java/com/osyris/verticalchainconveyors/mixin/` and 
 
 ## Gotchas when editing
 
-- **Mixin `@Shadow` cannot see inherited members.** If a method comes from a parent class (e.g., `Block.createBlockStateDefinition` inherited by `ChainConveyorBlock`), target the SRG name directly and use `(Parent)(Object)this` casts instead of `@Shadow`.
+- **Mixin `@Shadow` cannot see inherited members.** If a method comes from a parent class (e.g., `Block.createBlockStateDefinition` inherited by `ChainConveyorBlock`), target the method on the declaring class by its Mojmap name and use `(Parent)(Object)this` casts instead of `@Shadow`.
 - **`@Shadow` on a non-null `final` field silently nullifies it** in the bytecode-merged class. This killed `ChainConveyorVisual.guards` — use an `@Accessor` interface instead.
 - **`facing=DOWN` paths must short-circuit to Create's original code.** Every geometry mixin checks `if (facing == Direction.DOWN) return;` before running our code — this keeps floor-mounted behaviour bit-identical to vanilla Create so existing builds are unaffected.
 - **`getRotationAxis` is called by Flywheel's `RotatingInstance.setup`**, which means our override drives the shaft's rotation axis but NOT its positive/negative direction. The shaft model is only axis-oriented; distinguishing `UP` from `DOWN` (etc.) requires a separate visual flip.
@@ -117,14 +117,14 @@ When a local Create source checkout is available, compare against the matching C
 - `content/kinetics/chainConveyor/ChainConveyorVisual.java` — `setupGuards` (wheel + guard instance setup)
 - `content/kinetics/base/SingleAxisRotatingVisual.java` — parent class of `ChainConveyorVisual`; renders the rotating shaft via `rotatingModel`
 
-When writing or changing mixin method descriptors, verify the actual runtime signature against `libs/create-1.20.1-6.0.8.jar` rather than relying only on the checked-out source. The source tree can differ in loader/version details; for example the runtime Forge jar's `ChainConveyorBlockEntity.read` signature is `read(CompoundTag, boolean)`, not a `HolderLookup.Provider` variant.
+When writing or changing mixin method descriptors, verify the actual runtime signature against `libs/create-1.21.1-6.0.10.jar` rather than relying only on the checked-out source. For example the runtime NeoForge jar's `ChainConveyorBlockEntity.read` signature is `read(CompoundTag, HolderLookup.Provider, boolean)` — the `HolderLookup.Provider` was added in 1.20.5+.
 
 ```sh
 javap \
-  -classpath libs/create-1.20.1-6.0.8.jar \
+  -classpath libs/create-1.21.1-6.0.10.jar \
   -p com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity
 ```
 
 ## Dependencies
 
-`libs/` contains Create 6.0.8 and its embedded transitive JARs (Flywheel, Ponder, Registrate) extracted from `create-1.20.1-6.0.8.jar`. These are `compileOnly` — at runtime the server/client has Create installed, so the mod only ships its own thin bytecode.
+`libs/` contains Create 6.0.10 and its embedded transitive JARs (Flywheel, Ponder, Registrate) extracted from `create-1.21.1-6.0.10.jar`. These are `compileOnly` — at runtime the server/client has Create installed, so the mod only ships its own thin bytecode.

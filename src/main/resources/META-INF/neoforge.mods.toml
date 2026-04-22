@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[4,)"
 license = "MIT"
 issueTrackerURL = ""
 
@@ -13,22 +13,22 @@ issueTrackerURL = ""
     '''
 
 [[dependencies.verticalchainconveyors]]
-    modId = "forge"
-    mandatory = true
-    versionRange = "[47.1,)"
+    modId = "neoforge"
+    type = "required"
+    versionRange = "[21.1,)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.verticalchainconveyors]]
     modId = "minecraft"
-    mandatory = true
-    versionRange = "[1.20.1,1.21)"
+    type = "required"
+    versionRange = "[1.21.1,1.22)"
     ordering = "NONE"
     side = "BOTH"
 
 [[dependencies.verticalchainconveyors]]
     modId = "create"
-    mandatory = true
+    type = "required"
     versionRange = "[6.0,)"
     ordering = "AFTER"
     side = "BOTH"

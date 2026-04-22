@@ -222,7 +222,7 @@ public abstract class ChainConveyorConnectionHandlerMixin {
 
         if (simulate) { cir.setReturnValue(true); return; }
 
-        com.simibubi.create.AllPackets.getChannel()
+        net.createmod.catnip.platform.CatnipServices.NETWORK
                 .sendToServer(new ChainConveyorConnectionPacket(firstPos, pos, chain, true));
 
         CreateLang.text("").sendStatus(player);

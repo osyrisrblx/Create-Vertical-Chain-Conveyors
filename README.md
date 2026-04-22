@@ -1,6 +1,6 @@
 # Create: Vertical Chain Conveyors
 
-A Forge addon for Create that lets Chain Conveyors mount on floors, ceilings, and walls.
+A NeoForge addon for Create that lets Chain Conveyors mount on floors, ceilings, and walls.
 
 Vanilla Create Chain Conveyors are floor-mounted only. This mod extends Create's existing `chain_conveyor` block so the same item can be placed against any face and still participates in Create logistics: package movement, routing, chain rendering, selection previews, and ports.
 
@@ -19,21 +19,21 @@ Chain links can be made between conveyors mounted on any face. Same-facing runs,
 
 ## Compatibility
 
-- Minecraft: `1.20.1`
-- Forge: `47.1.0+`
+- Minecraft: `1.21.1`
+- NeoForge: `21.1.77+`
 - Create: `6.0.x`
-- Java: `17`
+- Java: `21`
 
-The mod is built and tested against Create `1.20.1-6.0.8`.
+The mod is built and tested against Create `1.21.1-6.0.10`.
 
 ## Installation
 
-Install this mod alongside Create in a Forge `1.20.1` instance.
+Install this mod alongside Create in a NeoForge `1.21.1` instance.
 
 Required mods:
 
 - Create `6.0.x`
-- Forge `47.1.0+`
+- NeoForge `21.1.77+`
 
 Both the client and server should have the mod installed.
 
@@ -48,10 +48,10 @@ Run from the repository root:
 The built jar is written to:
 
 ```text
-build/libs/verticalchainconveyors-1.20.1-1.0.0.jar
+build/libs/verticalchainconveyors-1.21.1-1.0.0.jar
 ```
 
-The helper script uses Java 17 and supports local environment overrides for Windows/WSL development. Machine-specific build and deployment notes should live in `CLAUDE.local.md`, which is ignored by git.
+The helper script stages the repo into a Windows-local workspace and runs `gradlew.bat` there with Java 21 to avoid NeoForge tooling stalls on `\\wsl.localhost\…` paths. Machine-specific Java, cache, workspace, and deployment paths should live in `CLAUDE.local.md`, which is ignored by git.
 
 ## Testing
 

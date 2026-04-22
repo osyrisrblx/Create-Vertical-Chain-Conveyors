@@ -21,6 +21,7 @@ import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -57,7 +58,7 @@ public abstract class ChainConveyorBlockEntityMixin {
     @Unique private static final int VCC_STATS_RETRIES_ON_LOAD = 60;
 
     @Inject(method = "read", at = @At("TAIL"))
-    private void vccRefreshVisualsAfterRead(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
+    private void vccRefreshVisualsAfterRead(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
         BlockEntity self = (BlockEntity)(Object)this;
         Level level = self.getLevel();
         vcc_pendingVisualRefresh = level == null || level.isClientSide();

@@ -1,5 +1,5 @@
 plugins {
-    id 'net.neoforged.moddev.legacyforge' version '2.0.107'
+    id 'net.neoforged.moddev' version '2.0.140'
 }
 
 version = "${mod_version}"
@@ -7,16 +7,29 @@ group = "${mod_group}"
 base { archivesName = "${mod_id}-${minecraft_version}" }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
 }
 
-legacyForge {
-    version = "${minecraft_version}-${forge_version}"
+neoForge {
+    enable {
+        version = "${neoforge_version}"
+        disableRecompilation = true
+    }
 
-    mixin {
-        add(sourceSets.main, "${mod_id}.refmap.json")
-        config("${mod_id}.mixins.json")
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
@@ -36,12 +49,10 @@ repositories {
 }
 
 dependencies {
-    // Create 6.0.8 + its embedded dependencies (Ponder/Catnip) from the libs/ folder.
-    // These JARs are extracted from create-1.20.1-6.0.8.jar for compilation.
-    // At runtime the server already has Create installed.
+    // Create 6.0.10 + embedded deps (Flywheel/Ponder/Registrate) extracted from the jar.
+    // compileOnly — at runtime these come from the Create mod jar on the client/server.
     compileOnly fileTree(dir: 'libs', include: '*.jar')
 
-    // SpongePowered Mixin API — needed at compile time for @Mixin, @Inject etc.
     compileOnly("org.spongepowered:mixin:0.8.5")
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 

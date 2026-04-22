@@ -96,7 +96,7 @@ public abstract class ChainConveyorBlockMixin extends KineticBlock {
      * their wheels (radius 1.25) would overlap regardless of which side of the axis each
      * is mounted on, matching vanilla Create's "no overlap in the wheel plane" rule.
      */
-    @Inject(method = "m_5573_", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getStateForPlacement", at = @At("HEAD"), cancellable = true)
     private void vccGetStateForPlacement(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
         Direction facing = ctx.getClickedFace().getOpposite();
         Direction.Axis axis = facing.getAxis();
@@ -136,13 +136,13 @@ public abstract class ChainConveyorBlockMixin extends KineticBlock {
         return false;
     }
 
-    @Inject(method = "m_5940_", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getShape", at = @At("HEAD"), cancellable = true)
     private void vccGetShape(BlockState state, BlockGetter level, BlockPos pos,
             CollisionContext ctx, CallbackInfoReturnable<VoxelShape> cir) {
         cir.setReturnValue(VCC_SHAPES[state.getValue(VCC_FACING).getAxis().ordinal()]);
     }
 
-    @Inject(method = "m_6079_", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getInteractionShape", at = @At("HEAD"), cancellable = true)
     private void vccGetInteractionShape(BlockState state, BlockGetter level, BlockPos pos,
             CallbackInfoReturnable<VoxelShape> cir) {
         cir.setReturnValue(VCC_SHAPES[state.getValue(VCC_FACING).getAxis().ordinal()]);
