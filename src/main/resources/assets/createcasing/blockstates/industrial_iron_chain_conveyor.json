@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=down":  { "model": "createcasing:block/chain_conveyor/industrial_iron/block" },
+    "facing=up":    { "model": "createcasing:block/chain_conveyor/industrial_iron/block", "x": 180 },
+    "facing=north": { "model": "createcasing:block/chain_conveyor/industrial_iron/block", "x": 90, "y": 180 },
+    "facing=south": { "model": "createcasing:block/chain_conveyor/industrial_iron/block", "x": 270, "y": 180 },
+    "facing=west":  { "model": "createcasing:block/chain_conveyor/industrial_iron/block", "x": 90, "y": 90 },
+    "facing=east":  { "model": "createcasing:block/chain_conveyor/industrial_iron/block", "x": 90, "y": 270 }
+  }
+}

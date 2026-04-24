@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import com.mojang.math.Transformation;
@@ -27,8 +28,9 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  * variants whose source mod generated the blockstate JSON with a single
  * un-rotated variant (e.g. Create Encased's simpleBlock call).
  *
- * the transformation is expected to rotate around the block centre (0.5,0.5,0.5),
- * as produced by {@link net.minecraft.client.resources.model.BlockModelRotation#getRotation()}.
+ * {@link net.minecraft.client.resources.model.BlockModelRotation#getRotation()}
+ * is a pure rotation, so this wrapper adds the block-centre pivot normally
+ * supplied by vanilla blockstate baking.
  */
 public class VCCRotatingBakedModel extends BakedModelWrapper<BakedModel> {
 
@@ -38,7 +40,7 @@ public class VCCRotatingBakedModel extends BakedModelWrapper<BakedModel> {
 
     public VCCRotatingBakedModel(BakedModel original, Transformation transformation) {
         super(original);
-        this.quadTransformer = QuadTransformers.applying(transformation);
+        this.quadTransformer = QuadTransformers.applying(aroundBlockCenter(transformation));
         for (Direction d : Direction.values()) {
             Vec3i n = d.getNormal();
             Vector3f v = new Vector3f(n.getX(), n.getY(), n.getZ());
@@ -47,6 +49,14 @@ public class VCCRotatingBakedModel extends BakedModelWrapper<BakedModel> {
             rotatedByOriginal[d.ordinal()] = rotated;
             originalByRotated[rotated.ordinal()] = d;
         }
+    }
+
+    private static Transformation aroundBlockCenter(Transformation transformation) {
+        Matrix4f matrix = new Matrix4f()
+                .translation(0.5f, 0.5f, 0.5f)
+                .mul(transformation.getMatrix())
+                .translate(-0.5f, -0.5f, -0.5f);
+        return new Transformation(matrix);
     }
 
     @Override

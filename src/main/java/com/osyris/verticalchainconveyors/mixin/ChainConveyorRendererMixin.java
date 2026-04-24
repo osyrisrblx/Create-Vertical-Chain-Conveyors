@@ -15,6 +15,7 @@ import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorPackage;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorPackage.ChainConveyorPackagePhysicsData;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorRenderer;
 import com.simibubi.create.content.logistics.box.PackageItem;
+import com.osyris.verticalchainconveyors.VCCChainConveyorPartials;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
@@ -70,7 +71,7 @@ public abstract class ChainConveyorRendererMixin extends KineticBlockEntityRende
             return;
         }
 
-        SuperByteBuffer wheel = CachedBuffers.partial(AllPartialModels.CHAIN_CONVEYOR_WHEEL, state);
+        SuperByteBuffer wheel = CachedBuffers.partial(VCCChainConveyorPartials.wheel(state), state);
         vccOrientWheel(wheel, facing);
         wheel.light(light)
                 .overlay(overlay)
@@ -104,7 +105,8 @@ public abstract class ChainConveyorRendererMixin extends KineticBlockEntityRende
                 continue;
 
             if (!VisualizationManager.supportsVisualization(be.getLevel())) {
-                SuperByteBuffer guard = CachedBuffers.partial(AllPartialModels.CHAIN_CONVEYOR_GUARD, be.getBlockState());
+                BlockState state = be.getBlockState();
+                SuperByteBuffer guard = CachedBuffers.partial(VCCChainConveyorPartials.guard(state), state);
                 vccOrientGuard(guard, facing, blockPos);
                 guard.light(light)
                         .overlay(overlay)

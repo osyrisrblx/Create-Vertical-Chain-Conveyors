@@ -38,6 +38,8 @@ import net.neoforged.neoforge.client.event.ModelEvent;
         value = Dist.CLIENT)
 public final class VCCChainConveyorModelFixup {
 
+    private static final String CREATE_ENCASED_MOD_ID = "createcasing";
+
     private VCCChainConveyorModelFixup() {}
 
     // keep in sync with assets/create/blockstates/chain_conveyor.json
@@ -59,7 +61,7 @@ public final class VCCChainConveyorModelFixup {
                 continue;
             if (!block.defaultBlockState().hasProperty(BlockStateProperties.FACING))
                 continue;
-            if (!isSimpleBlockBaking(block, models))
+            if (!isCreateEncasedChainConveyor(block) && !isSimpleBlockBaking(block, models))
                 continue;
 
             BlockState downState = block.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.DOWN);
@@ -91,5 +93,9 @@ public final class VCCChainConveyorModelFixup {
                 return false;
         }
         return reference != null;
+    }
+
+    private static boolean isCreateEncasedChainConveyor(Block block) {
+        return CREATE_ENCASED_MOD_ID.equals(BuiltInRegistries.BLOCK.getKey(block).getNamespace());
     }
 }
