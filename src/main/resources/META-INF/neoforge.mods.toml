@@ -1,0 +1,47 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/osyrisrblx/Create-Vertical-Chain-Conveyors/issues"
+
+[[mods]]
+    modId = "verticalchainconveyors"
+    version = "${file.jarVersion}"
+    displayName = "Create: Vertical Chain Conveyors"
+    authors = "Osyris"
+    displayURL = "https://github.com/osyrisrblx/Create-Vertical-Chain-Conveyors"
+    logoFile = "logo.png"
+    description = '''
+        Allows Create Chain Conveyors to mount on floors, ceilings, and walls,
+        with axis-aware connection geometry, previews, rendering, and package movement.
+    '''
+
+[[dependencies.verticalchainconveyors]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "[21.1.219,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.verticalchainconveyors]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "[1.21.1,1.22)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.verticalchainconveyors]]
+    modId = "create"
+    type = "required"
+    versionRange = "[6.0,6.1)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.verticalchainconveyors]]
+    modId = "createcasing"
+    type = "optional"
+    versionRange = "[1.8,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[mixins]]
+    config = "verticalchainconveyors.mixins.json"

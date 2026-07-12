@@ -1,0 +1,42 @@
+# Gradle build output and local caches
+/.gradle/
+/build/
+/out/
+/bin/
+
+# Forge/ModDev generated runtime workspace
+/dev/
+/run/
+/runs/
+
+# Minecraft runtime output
+/logs/
+/crash-reports/
+*.log
+hs_err_pid*
+replay_pid*
+*.hprof
+
+# IDE/editor metadata
+/.idea/
+*.iml
+*.ipr
+*.iws
+/.vscode/
+/.project
+/.classpath
+/.settings/
+/.factorypath
+
+# OS and local tool noise
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+/.codex
+/.codex/
+
+# Local agent/runtime notes
+/CLAUDE.local.md
+
+# Downloaded mod development dependencies
+/libs/*.jar

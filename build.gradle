@@ -1,0 +1,108 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.140'
+}
+
+version = "${mod_version}"
+group = "${mod_group}"
+base { archivesName = "${mod_id}-${minecraft_version}" }
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+neoForge {
+    enable {
+        version = "${neoforge_version}"
+        disableRecompilation = true
+    }
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+repositories {
+    maven {
+        name 'sponge'
+        url 'https://repo.spongepowered.org/repository/maven-public'
+        content { includeGroup 'org.spongepowered' }
+    }
+    maven {
+        name 'curse maven'
+        url 'https://www.cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    maven {
+        name 'modrinth'
+        url 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    maven { url = 'https://maven.createmod.net' }
+    maven { url = 'https://maven.ithundxr.dev/snapshots' }
+}
+
+dependencies {
+    // Official Create 6.0.10 Modrinth artifact. Runtime inclusion is for the
+    // generated client/server development runs; the published jar remains thin.
+    compileOnly("maven.modrinth:LNytGWDc:UjX6dr61")
+    runtimeOnly("maven.modrinth:LNytGWDc:UjX6dr61")
+
+    compileOnly("com.tterrag.registrate:Registrate:MC1.21-1.3.0+67")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-1.21.1:1.0.6")
+    compileOnly("net.createmod.ponder:ponder-neoforge:1.0.82+mc1.21.1")
+
+    compileOnly("org.spongepowered:mixin:0.8.5")
+
+    testImplementation("maven.modrinth:LNytGWDc:UjX6dr61")
+    testImplementation("com.tterrag.registrate:Registrate:MC1.21-1.3.0+67")
+    testImplementation("dev.engine-room.flywheel:flywheel-neoforge-1.21.1:1.0.6")
+    testImplementation("net.createmod.ponder:ponder-neoforge:1.0.82+mc1.21.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+sourceSets {
+    test {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    from('LICENSE') {
+        into 'META-INF'
+        rename { 'LICENSE_verticalchainconveyors' }
+    }
+    from('THIRD_PARTY_NOTICES.md') {
+        into 'META-INF'
+        rename { 'THIRD_PARTY_NOTICES_verticalchainconveyors.md' }
+    }
+
+    manifest {
+        attributes([
+            'Specification-Title'   : "${mod_id}",
+            'Specification-Vendor'  : 'osyris',
+            'Specification-Version' : '1',
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'osyris',
+            'MixinConfigs'          : "${mod_id}.mixins.json"
+        ])
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.osyris.verticalchainconveyors.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "ChainConveyorBlockEntityMixin",
+        "ChainConveyorBlockMixin",
+        "ChainConveyorBlockStateMixin",
+        "ChainConveyorBlockTransformMixin",
+        "ChainConveyorShapeBBMixin",
+        "VCCCachedRenderBBAccessor"
+    ],
+    "client": [
+        "ChainConveyorShapeBBClientMixin",
+        "ChainConveyorConnectionHandlerMixin",
+        "VCCBlockEntityVisualVisibilityMixin",
+        "ChainConveyorRendererMixin",
+        "ChainConveyorRidingHandlerMixin",
+        "ChainConveyorVisualMixin",
+        "VCCChainVisualAccessor",
+        "VCCSingleAxisVisualAccessor",
+        "VCCVisualAccessor"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
