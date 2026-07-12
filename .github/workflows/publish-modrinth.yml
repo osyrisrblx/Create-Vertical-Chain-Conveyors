@@ -1,0 +1,96 @@
+name: Publish to Modrinth
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: modrinth-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build, test, and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the released commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          validate-wrappers: true
+
+      - name: Validate publishing configuration and release version
+        id: release
+        shell: bash
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          if [[ -z "$MODRINTH_TOKEN" ]]; then
+            echo "Missing repository secret MODRINTH_TOKEN." >&2
+            exit 1
+          fi
+
+          if [[ -z "$MODRINTH_PROJECT_ID" ]]; then
+            echo "Missing repository variable MODRINTH_PROJECT_ID." >&2
+            exit 1
+          fi
+
+          version="$(sed -nE 's/^mod_version[[:space:]]*=[[:space:]]*(.*)$/\1/p' gradle.properties | tr -d '\r')"
+          if [[ -z "$version" ]]; then
+            echo "Could not read mod_version from gradle.properties." >&2
+            exit 1
+          fi
+
+          if [[ "$RELEASE_TAG" != "$version" && "$RELEASE_TAG" != "v$version" ]]; then
+            echo "Release tag '$RELEASE_TAG' does not match mod_version '$version'." >&2
+            exit 1
+          fi
+
+          if [[ "$version" == *-alpha* ]]; then
+            version_type=alpha
+          elif [[ "$IS_PRERELEASE" == true || "$version" == *-beta* || "$version" == *-rc* ]]; then
+            version_type=beta
+          else
+            version_type=release
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version_type=$version_type" >> "$GITHUB_OUTPUT"
+
+      - name: Build and run tests
+        run: ./gradlew clean build --stacktrace
+
+      - name: Verify release jar
+        shell: bash
+        run: |
+          minecraft_version="$(sed -nE 's/^minecraft_version[[:space:]]*=[[:space:]]*(.*)$/\1/p' gradle.properties | tr -d '\r')"
+          jar="build/libs/verticalchainconveyors-${minecraft_version}-${{ steps.release.outputs.version }}.jar"
+          if [[ ! -f "$jar" ]]; then
+            echo "Expected release jar was not built: $jar" >&2
+            exit 1
+          fi
+
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+          MODRINTH_VERSION_TYPE: ${{ steps.release.outputs.version_type }}
+          MODRINTH_CHANGELOG: ${{ github.event.release.body }}
+        run: ./gradlew modrinth --stacktrace

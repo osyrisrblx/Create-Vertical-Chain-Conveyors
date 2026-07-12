@@ -1,5 +1,6 @@
 plugins {
     id 'net.neoforged.moddev' version '2.0.140'
+    id 'com.modrinth.minotaur' version '2.9.0'
 }
 
 version = "${mod_version}"
@@ -104,5 +105,22 @@ jar {
             'Implementation-Vendor' : 'osyris',
             'MixinConfigs'          : "${mod_id}.mixins.json"
         ])
+    }
+}
+
+modrinth {
+    token = System.getenv('MODRINTH_TOKEN')
+    projectId = System.getenv('MODRINTH_PROJECT_ID') ?: 'create-vertical-chain-conveyors'
+    versionNumber = project.version.toString()
+    versionName = "Create: Vertical Chain Conveyors ${project.version}"
+    versionType = System.getenv('MODRINTH_VERSION_TYPE') ?: 'release'
+    uploadFile = tasks.named('jar')
+    gameVersions = [minecraft_version]
+    loaders = ['neoforge']
+    changelog = System.getenv('MODRINTH_CHANGELOG')?.trim()
+        ?: 'See the corresponding GitHub release for details.'
+
+    dependencies {
+        required.project 'create'
     }
 }
