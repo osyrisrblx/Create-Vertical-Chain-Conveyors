@@ -36,6 +36,20 @@ public final class VCCChainConveyorMath {
 
     public record ConnectionValidation(boolean axiallyInvalid, boolean tooSteep) {}
 
+    /**
+     * Apply the configurable steepness policy without weakening same-axis links.
+     * Different-facing conveyors can still share an axis (for example floor to
+     * ceiling), so compare the axes rather than the Direction values.
+     */
+    public static boolean tooSteepUnderPolicy(ConnectionValidation validation,
+            Direction sourceFacing, Direction targetFacing,
+            boolean allowSteepMixedAxisConnections) {
+        if (!validation.tooSteep())
+            return false;
+        return !allowSteepMixedAxisConnections
+                || sourceFacing.getAxis() == targetFacing.getAxis();
+    }
+
     public static ConnectionStats calculateConnectionStats(BlockPos sourcePos, BlockPos connection,
             Direction facing, boolean reversed) {
         return calculateConnectionStats(sourcePos, connection, facing, facing, reversed);

@@ -494,6 +494,52 @@ class VCCChainConveyorMathTest {
     }
 
     @Test
+    void steepMixedAxisPolicyAllowsCoplanarFloorToWallCornersWhenEnabled() {
+        BlockPos connection = new BlockPos(4, 4, 0);
+        Direction sourceFacing = Direction.DOWN;
+        Direction targetFacing = Direction.EAST;
+        VCCChainConveyorMath.ConnectionValidation validation =
+                VCCChainConveyorMath.connectionValidation(connection, sourceFacing, targetFacing);
+
+        assertFalse(validation.axiallyInvalid());
+        assertTrue(validation.tooSteep());
+        assertTrue(VCCChainConveyorMath.tooSteepUnderPolicy(validation,
+                sourceFacing, targetFacing, false));
+        assertFalse(VCCChainConveyorMath.tooSteepUnderPolicy(validation,
+                sourceFacing, targetFacing, true));
+    }
+
+    @Test
+    void steepMixedAxisPolicyIsReciprocal() {
+        BlockPos connection = new BlockPos(4, 4, 0);
+        VCCChainConveyorMath.ConnectionValidation forward =
+                VCCChainConveyorMath.connectionValidation(connection,
+                        Direction.DOWN, Direction.EAST);
+        VCCChainConveyorMath.ConnectionValidation reverse =
+                VCCChainConveyorMath.connectionValidation(connection.multiply(-1),
+                        Direction.EAST, Direction.DOWN);
+
+        assertEquals(forward, reverse);
+        assertEquals(
+                VCCChainConveyorMath.tooSteepUnderPolicy(forward,
+                        Direction.DOWN, Direction.EAST, true),
+                VCCChainConveyorMath.tooSteepUnderPolicy(reverse,
+                        Direction.EAST, Direction.DOWN, true));
+    }
+
+    @Test
+    void steepMixedAxisPolicyNeverRelaxesSameAxisConnections() {
+        VCCChainConveyorMath.ConnectionValidation validation =
+                VCCChainConveyorMath.connectionValidation(new BlockPos(2, 5, 0),
+                        Direction.DOWN, Direction.UP);
+
+        assertFalse(validation.axiallyInvalid());
+        assertTrue(validation.tooSteep());
+        assertTrue(VCCChainConveyorMath.tooSteepUnderPolicy(validation,
+                Direction.DOWN, Direction.UP, true));
+    }
+
+    @Test
     void loopInteractionBoundsFollowEveryMountingFace() {
         for (Direction facing : Direction.values()) {
             AABB bounds = VCCChainConveyorMath.loopInteractionBounds(facing);

@@ -8,6 +8,7 @@ Run these in a local client profile after the jar has been deployed. Keep one sm
 - **Selection outlines:** start a chain connection from each non-DOWN facing and hover valid/invalid targets. White, green, and red outlines should sit on the mounted wheel plane, offset inward from the mounting face, not always horizontally.
 - **Preview lines:** while selecting a second conveyor, inspect the two intended path lines for wall, ceiling, and mixed-facing pairs. Lines should connect tangent-to-tangent without horizontal XZ assumptions.
 - **Connection validation:** verify too-close, axial, too-steep, and reasonable planar connections for wall and ceiling mounts. The status message should match the expected reason.
+- **Steep mixed-axis config:** with `allowSteepMixedAxisConnections=false`, verify a coplanar floor-to-wall corner is rejected as too steep. Set it to `true`, reload the world/server, and verify the same link succeeds while a steep same-axis link remains rejected.
 - **Validation symmetry:** try the same mixed-axis link starting from each endpoint. Both selection orders must return the same valid/invalid result.
 - **Loop interaction:** with a rideable chain, package, and Frogport, target the wheel loop from every mounting direction. The hit region and custom outline must follow the mounted wheel plane.
 - **Flywheel modes:** repeat representative idle/connected/package checks with Flywheel visualization enabled and disabled.
@@ -25,4 +26,4 @@ Run these in a local client profile after the jar has been deployed. Keep one sm
 
 - **Delayed chunk load:** create a mixed-facing connection across a chunk border, unload both chunks, then load only one endpoint for several seconds before loading the other. Rendering and package transfer must correct themselves when the target arrives.
 - **Transforms:** rotate and mirror wall-, floor-, and ceiling-mounted conveyors with a structure or schematic workflow. `FACING` and connection offsets must transform together.
-- **Dedicated server:** start a dedicated server with Create and this mod, join with a matching client, and exercise one mixed-facing package route.
+- **Dedicated server:** start a dedicated server with Create and this mod, join with a matching client, and exercise one mixed-facing package route. Confirm the server's steep mixed-axis setting controls the client's preview and placement result.

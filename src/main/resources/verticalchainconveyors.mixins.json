@@ -8,8 +8,10 @@
         "ChainConveyorBlockMixin",
         "ChainConveyorBlockStateMixin",
         "ChainConveyorBlockTransformMixin",
+        "ChainConveyorConnectionPacketMixin",
         "ChainConveyorShapeBBMixin",
-        "VCCCachedRenderBBAccessor"
+        "VCCCachedRenderBBAccessor",
+        "VCCChainConveyorConnectionPacketAccessor"
     ],
     "client": [
         "ChainConveyorShapeBBClientMixin",

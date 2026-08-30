@@ -37,6 +37,23 @@ Required mods:
 
 Both the client and server should have the mod installed.
 
+## Configuration
+
+The per-world server config is written to
+`world/serverconfig/verticalchainconveyors-server.toml` and is synchronized to
+connected clients.
+
+```toml
+[connections]
+allowSteepMixedAxisConnections = false
+```
+
+The default `false` preserves Create's 45-degree slope restriction. Set it to
+`true` to allow steeper links only when the two conveyors rotate on different
+axes, including coplanar floor-to-wall corners. Wheel clearance, minimum and
+maximum distance, chain cost, and connection-count checks still apply. Changing
+the option controls new connections and does not remove existing ones.
+
 ## Building From Source
 
 On a normal Java 21 development environment, run from the repository root:
@@ -54,7 +71,7 @@ For this repository's WSL-on-Windows development setup, use:
 The built jar is written to:
 
 ```text
-build/libs/verticalchainconveyors-1.21.1-1.0.0.jar
+build/libs/verticalchainconveyors-1.21.1-1.2.0.jar
 ```
 
 The helper script stages the repo into a Windows-local workspace and runs `gradlew.bat` there with Java 21 to avoid NeoForge tooling stalls on `\\wsl.localhost\…` paths. It is not required for ordinary Linux, macOS, or Windows checkouts. Machine-specific Java, cache, workspace, and deployment paths should live in `CLAUDE.local.md`, which is ignored by git.

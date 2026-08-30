@@ -17,6 +17,7 @@ import com.simibubi.create.content.equipment.blueprint.BlueprintOverlayRenderer;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.osyris.verticalchainconveyors.VCCChainConveyorMath;
+import com.osyris.verticalchainconveyors.VCCServerConfig;
 
 import net.createmod.catnip.outliner.Outliner;
 import net.minecraft.ChatFormatting;
@@ -184,7 +185,8 @@ public abstract class ChainConveyorConnectionHandlerMixin {
             cir.setReturnValue(vccFail("chain_conveyor.cannot_connect_axially"));
             return;
         }
-        if (validation.tooSteep()) {
+        if (VCCChainConveyorMath.tooSteepUnderPolicy(validation, facing, targetFacing,
+                VCCServerConfig.allowSteepMixedAxisConnections())) {
             cir.setReturnValue(vccFail("chain_conveyor.too_steep"));
             return;
         }

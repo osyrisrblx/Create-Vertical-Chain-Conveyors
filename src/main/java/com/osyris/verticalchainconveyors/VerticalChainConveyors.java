@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 
 @Mod(VerticalChainConveyors.MOD_ID)
 public class VerticalChainConveyors {
@@ -14,7 +16,8 @@ public class VerticalChainConveyors {
     public static final boolean DEBUG_ROUTING =
             Boolean.getBoolean(MOD_ID + ".debugRouting");
 
-    public VerticalChainConveyors() {
+    public VerticalChainConveyors(ModContainer container) {
+        container.registerConfig(ModConfig.Type.SERVER, VCCServerConfig.SPEC);
     }
 
     public static void debugRouting(String message, Object... args) {
