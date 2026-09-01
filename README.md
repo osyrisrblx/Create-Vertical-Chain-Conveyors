@@ -115,4 +115,5 @@ code and modified for vertical and wall-mounted chain conveyors. See
 
 Create's assets remain under the Create project license. This mod references
 Create assets and models at runtime but does not commit or redistribute Create's
-mod jar, models, or texture files.
+mod jar, models, or texture files. The Create-style blueprint background used by
+the project logo is credited separately in `THIRD_PARTY_NOTICES.md`.
