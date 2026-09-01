@@ -18,7 +18,7 @@ NeoForge mod for Minecraft 1.21.1 that extends Create 6.0.10's Chain Conveyor to
 
 The helper stages the repo into a Windows-local workspace (under `%LOCALAPPDATA%\Temp\vcc-build\workspace`), runs `gradlew.bat` there with Java 21, and syncs `build/` back to the repo when the build succeeds. This avoids NeoForge's NFRT / `binarypatcher` stalls when reading/writing through `\\wsl.localhost\…`. Local Java paths, cache paths, workspace paths, and deploy destinations belong in `CLAUDE.local.md`, which is intentionally gitignored.
 
-Output: `build/libs/verticalchainconveyors-1.21.1-1.2.0.jar`
+Output: `build/libs/verticalchainconveyors-1.21.1-1.2.1.jar`
 
 After a successful build, deploy to the local runtime locations listed in `CLAUDE.local.md` if that file exists.
 
