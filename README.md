@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Create: Vertical Chain Conveyors logo" width="256">
+</p>
+
 # Create: Vertical Chain Conveyors
 
 A NeoForge addon for Create that lets Chain Conveyors mount on floors, ceilings, and walls.
@@ -71,7 +75,7 @@ For this repository's WSL-on-Windows development setup, use:
 The built jar is written to:
 
 ```text
-build/libs/verticalchainconveyors-1.21.1-1.2.0.jar
+build/libs/verticalchainconveyors-1.21.1-1.2.1.jar
 ```
 
 The helper script stages the repo into a Windows-local workspace and runs `gradlew.bat` there with Java 21 to avoid NeoForge tooling stalls on `\\wsl.localhost\…` paths. It is not required for ordinary Linux, macOS, or Windows checkouts. Machine-specific Java, cache, workspace, and deployment paths should live in `CLAUDE.local.md`, which is ignored by git.
