@@ -52,9 +52,16 @@ connected clients.
 allowSteepMixedAxisConnections = false
 ```
 
-The default `false` preserves Create's 45-degree slope restriction. Set it to
-`true` to allow steeper links only when the two conveyors rotate on different
-axes, including coplanar floor-to-wall corners. Wheel clearance, minimum and
+Links between conveyors on the same axis (floor to floor, floor to ceiling,
+wall to the same wall) keep Create's 45-degree slope restriction. Links between
+conveyors on different axes, such as a wall conveyor chained down to a floor
+conveyor in front of it, must turn the chain through 90 degrees between the two
+wheel planes, so they allow the chain to leave each wheel up to 67.5 degrees out
+of that wheel's plane. A wall-to-floor diagonal works at any 1:1 scale and at
+slopes between roughly 1:2.4 and 2.4:1.
+
+The default `false` keeps those limits. Set it to `true` to allow steeper links
+only when the two conveyors rotate on different axes. Wheel clearance, minimum and
 maximum distance, chain cost, and connection-count checks still apply. Changing
 the option controls new connections and does not remove existing ones.
 

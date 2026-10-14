@@ -12,9 +12,10 @@ public final class VCCServerConfig {
         builder.push("connections");
         ALLOW_STEEP_MIXED_AXIS_CONNECTIONS = builder
                 .comment(
-                        "Allow connections between conveyors on different axes even when Create's",
-                        "normal 45-degree slope limit is exceeded. Clearance, range, and all other",
-                        "connection checks still apply. Existing connections are not affected.")
+                        "Allow connections between conveyors on different axes even when the chain",
+                        "leaves either wheel more than 67.5 degrees out of that wheel's plane.",
+                        "Same-axis links always keep Create's 45-degree limit. Clearance, range, and",
+                        "all other connection checks still apply. Existing connections are not affected.")
                 .define("allowSteepMixedAxisConnections", false);
         builder.pop();
         SPEC = builder.build();

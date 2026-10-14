@@ -15,6 +15,14 @@ public final class VCCChainConveyorMath {
     public static final double WHEEL_CENTER_BIAS = 0.125;
     public static final double CONNECTION_RADIUS = 1.25;
     public static final double LOOP_RADIUS = 0.875;
+    public static final double CONNECTION_CLEARANCE = 1.5;
+    /**
+     * tan(67.5 degrees).  Perpendicular wheels force a chain through a 90-degree
+     * change of plane, so Create's 45-degree per-wheel limit can only ever be met
+     * on the exact diagonal.  Mixed-axis links instead let each end lean up to
+     * vanilla's 45 degrees plus half of the remaining forced turn.
+     */
+    public static final double MIXED_AXIS_MAX_SLOPE = 1 + Math.sqrt(2);
 
     private VCCChainConveyorMath() {}
 
@@ -31,6 +39,16 @@ public final class VCCChainConveyorMath {
 
         public boolean tooSteep() {
             return axialDisplacement / planarDistance > 1;
+        }
+
+        /**
+         * slope limit for an end of a mixed-axis link.  Measured against the true
+         * in-plane distance: the clearance margin already rejects links that pass
+         * through a wheel face, and applying it to both perpendicular ends would
+         * make every coplanar wall-to-floor link too steep.
+         */
+        public boolean tooSteepForMixedAxes() {
+            return axialDisplacement > MIXED_AXIS_MAX_SLOPE * (planarDistance + CONNECTION_CLEARANCE);
         }
     }
 
@@ -310,7 +328,9 @@ public final class VCCChainConveyorMath {
         ConnectionGeometry source = connectionGeometry(centerDiff, sourceFacing.getAxis());
         ConnectionGeometry target = connectionGeometry(centerDiff, targetFacing.getAxis());
         boolean axiallyInvalid = source.axiallyInvalid() || target.axiallyInvalid();
-        boolean tooSteep = !axiallyInvalid && (source.tooSteep() || target.tooSteep());
+        boolean tooSteep = !axiallyInvalid && (sourceFacing.getAxis() == targetFacing.getAxis()
+                ? source.tooSteep() || target.tooSteep()
+                : source.tooSteepForMixedAxes() || target.tooSteepForMixedAxes());
         return new ConnectionValidation(axiallyInvalid, tooSteep);
     }
 
@@ -319,13 +339,13 @@ public final class VCCChainConveyorMath {
         double axialDisplacement;
 
         if (axis == Direction.Axis.X) {
-            planarDistance = diff.multiply(0, 1, 1).length() - 1.5;
+            planarDistance = diff.multiply(0, 1, 1).length() - CONNECTION_CLEARANCE;
             axialDisplacement = Math.abs(diff.x);
         } else if (axis == Direction.Axis.Z) {
-            planarDistance = diff.multiply(1, 1, 0).length() - 1.5;
+            planarDistance = diff.multiply(1, 1, 0).length() - CONNECTION_CLEARANCE;
             axialDisplacement = Math.abs(diff.z);
         } else {
-            planarDistance = diff.multiply(1, 0, 1).length() - 1.5;
+            planarDistance = diff.multiply(1, 0, 1).length() - CONNECTION_CLEARANCE;
             axialDisplacement = Math.abs(diff.y);
         }
 

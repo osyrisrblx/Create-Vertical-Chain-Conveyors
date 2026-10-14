@@ -415,7 +415,7 @@ class VCCChainConveyorMathTest {
 
     @Test
     void mixedAxisConnectionValidationIsSymmetric() {
-        BlockPos connection = new BlockPos(5, 2, 2);
+        BlockPos connection = new BlockPos(8, 2, 1);
         VCCChainConveyorMath.ConnectionValidation forward =
                 VCCChainConveyorMath.connectionValidation(connection, Direction.EAST, Direction.UP);
         VCCChainConveyorMath.ConnectionValidation reverse =
@@ -494,8 +494,69 @@ class VCCChainConveyorMathTest {
     }
 
     @Test
+    void mixedAxisSlopeThresholdIsInclusiveAt67AndAHalfDegrees() {
+        double limit = VCCChainConveyorMath.MIXED_AXIS_MAX_SLOPE;
+        VCCChainConveyorMath.ConnectionGeometry atLimit =
+                VCCChainConveyorMath.connectionGeometry(new Vec3(2, 0, limit * 2), Direction.Axis.Z);
+        VCCChainConveyorMath.ConnectionGeometry aboveLimit =
+                VCCChainConveyorMath.connectionGeometry(new Vec3(2, 0, limit * 2 + 1.0E-6), Direction.Axis.Z);
+
+        assertEquals(Math.tan(Math.toRadians(67.5)), limit, EPS);
+        assertFalse(atLimit.tooSteepForMixedAxes());
+        assertTrue(aboveLimit.tooSteepForMixedAxes());
+    }
+
+    @Test
+    void coplanarWallToFloorDiagonalsConnectAtEveryReasonableScale() {
+        Direction[] walls = { Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST };
+        for (Direction wall : walls) {
+            Direction outward = wall.getOpposite();
+            for (int size = 2; size <= 16; size++) {
+                // floor-mounted below and in front of the wall, and ceiling-mounted above it
+                BlockPos below = BlockPos.ZERO.relative(outward, size).below(size);
+                BlockPos above = BlockPos.ZERO.relative(outward, size).above(size);
+                assertMixedLinkValid(below, wall, Direction.DOWN);
+                assertMixedLinkValid(above, wall, Direction.UP);
+            }
+        }
+    }
+
+    @Test
+    void coplanarWallToFloorLinksAllowUnevenSlopesWithinTheMixedLimit() {
+        int[][] heightAndDistance = { { 2, 4 }, { 4, 2 }, { 3, 7 }, { 7, 3 }, { 10, 5 }, { 5, 10 }, { 6, 12 } };
+        for (int[] pair : heightAndDistance) {
+            BlockPos connection = BlockPos.ZERO.relative(Direction.SOUTH, pair[1]).below(pair[0]);
+            assertMixedLinkValid(connection, Direction.NORTH, Direction.DOWN);
+        }
+    }
+
+    @Test
+    void coplanarWallToFloorLinksRejectNearlyAxialEnds() {
+        int[][] heightAndDistance = { { 2, 8 }, { 8, 2 }, { 3, 12 }, { 12, 3 }, { 4, 16 } };
+        for (int[] pair : heightAndDistance) {
+            BlockPos connection = BlockPos.ZERO.relative(Direction.SOUTH, pair[1]).below(pair[0]);
+            VCCChainConveyorMath.ConnectionValidation validation =
+                    VCCChainConveyorMath.connectionValidation(connection, Direction.NORTH, Direction.DOWN);
+
+            assertFalse(validation.axiallyInvalid(), "height " + pair[0] + " distance " + pair[1]);
+            assertTrue(validation.tooSteep(), "height " + pair[0] + " distance " + pair[1]);
+        }
+    }
+
+    private static void assertMixedLinkValid(BlockPos connection, Direction sourceFacing, Direction targetFacing) {
+        VCCChainConveyorMath.ConnectionValidation validation =
+                VCCChainConveyorMath.connectionValidation(connection, sourceFacing, targetFacing);
+        String message = sourceFacing + " -> " + targetFacing + " via " + connection;
+
+        assertFalse(validation.axiallyInvalid(), message);
+        assertFalse(validation.tooSteep(), message);
+        assertFalse(VCCChainConveyorMath.tooSteepUnderPolicy(validation,
+                sourceFacing, targetFacing, false), message);
+    }
+
+    @Test
     void steepMixedAxisPolicyAllowsCoplanarFloorToWallCornersWhenEnabled() {
-        BlockPos connection = new BlockPos(4, 4, 0);
+        BlockPos connection = new BlockPos(2, 8, 0);
         Direction sourceFacing = Direction.DOWN;
         Direction targetFacing = Direction.EAST;
         VCCChainConveyorMath.ConnectionValidation validation =
@@ -511,7 +572,7 @@ class VCCChainConveyorMathTest {
 
     @Test
     void steepMixedAxisPolicyIsReciprocal() {
-        BlockPos connection = new BlockPos(4, 4, 0);
+        BlockPos connection = new BlockPos(2, 8, 0);
         VCCChainConveyorMath.ConnectionValidation forward =
                 VCCChainConveyorMath.connectionValidation(connection,
                         Direction.DOWN, Direction.EAST);
