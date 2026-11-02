@@ -18,7 +18,7 @@ NeoForge mod for Minecraft 1.21.1 that extends Create 6.0.10's Chain Conveyor to
 
 The helper stages the repo into a Windows-local workspace (under `%LOCALAPPDATA%\Temp\vcc-build\workspace`), runs `gradlew.bat` there with Java 21, and syncs `build/` back to the repo when the build succeeds. This avoids NeoForge's NFRT / `binarypatcher` stalls when reading/writing through `\\wsl.localhost\…`. Local Java paths, cache paths, workspace paths, and deploy destinations belong in `CLAUDE.local.md`, which is intentionally gitignored.
 
-Output: `build/libs/verticalchainconveyors-1.21.1-1.3.0.jar`
+Output: `build/libs/verticalchainconveyors-1.21.1-1.3.1.jar`
 
 After a successful build, deploy to the local runtime locations listed in `CLAUDE.local.md` if that file exists.
 
@@ -51,6 +51,7 @@ Current fast coverage lives under `src/test/java/com/osyris/verticalchainconveyo
 - ray hits and misses against every mounted loop interaction plane
 - rotation and mirror round trips for every `FACING` value
 - indefinite, interval-controlled retry and eventual resolution of delayed target stats
+- lighting-section cache reuse and invalidation, concurrent registration, unknown-collector fallback, and continued Flywheel light updates after cache hits and movement
 
 When fixing a geometry bug, first move any reusable world-space math into `VCCChainConveyorMath`, add or update a JUnit case that reproduces the axis/orientation failure, then run `test`. After the fast suite passes, run the full `build` command above; `build` includes the JUnit suite. After a successful build, deploy the jar to the configured local Minecraft locations if available.
 
